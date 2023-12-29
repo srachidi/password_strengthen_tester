@@ -1,0 +1,60 @@
+#!/bin/python3
+import string
+import math
+
+def check_common_password(password):
+    with open('common.txt', 'r') as f:
+        common = f.read().splitlines()
+    return password in common
+
+def main():
+    password = input("Enter the password: ")
+
+    # Character type checking
+    characters = [any(c in s for c in password) for s in [string.ascii_uppercase, string.ascii_lowercase, string.punctuation, string.digits]]
+    length = len(password)
+    score = 0
+
+    # Common password check
+    if check_common_password(password):
+        print("Invalid Password!")
+        print("Password was found in a common list. Score: 0/10")
+        print("Password must contain Uppercase, Lowercase, Digits, Special Character")
+        return
+
+    # Minimum length check
+    if length < 8:
+        print("Invalid Password!")
+        print("Minimum length of password is 8. Score: 0/10")
+        print("Password must contain Uppercase, Lowercase, Digits, Special Character")
+        return
+
+    # Missing character check
+    missing_chars = [char_name for char_name, char_present in zip(["Uppercase", "Lowercase", "Special Character", "Digits"], characters) if not char_present]
+    if missing_chars:
+        print("Invalid Password!")
+        print(f"{' '.join(missing_chars)} are missing! Score: 0/10")
+        print("Password must contain Uppercase, Lowercase, Digits, Special Character")
+        return
+
+    # Scoring
+    score += min(4, length // 2)
+    score += sum(characters) - 1
+
+    # Entropy calculation
+    pool = sum(len(s) for s, char_present in zip([string.ascii_uppercase, string.ascii_lowercase, string.punctuation, string.digits], characters) if char_present)
+    entropy = length * math.log2(pool)
+
+    # Output based on score and entropy
+    if score < 4 or length <= 10 or entropy <= 35:
+        print(f"The password is quite weak! Score: {score} / 7")
+    elif score < 6 or length <= 14 or entropy <= 119:
+        print(f"The password is strong! Score: {score} / 7")
+    else:
+        print(f"The password is very strong! Score: {score} / 7")
+
+    print(f"Password length is {length}, adding {score} points out of 4!")
+    print(f"Password entropy is {entropy}")
+
+if __name__ == "__main__":
+    main()
